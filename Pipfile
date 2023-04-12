@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+jupyterlab = "*"
+pyyaml = "*"
+tables = "*"
+numpy = "==1.19.5"
+pandas = "==1.2.4"
+tensorflow = "==2.5.0"
+tensorflow-addons = "==0.13.0"
+matplotlib = "*"
+tqdm = "*"
+
+[dev-packages]
+pre-commit = "*"
+mypy = "*"
+
+[requires]

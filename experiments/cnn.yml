@@ -1,0 +1,18 @@
+experiment_name: 'cnn'
+
+model: Cnn
+
+data:
+  data_folder: 'TCSA_data'
+  batch_size: 50
+  encode_length: 2
+  estimate_distance: 8
+  rotate_type: 'no'
+  input_image_type: [0]
+
+training_setting:
+  evaluate_freq: 1
+  learning_rate: 0.0005
+  max_epoch: 25
+
+ 

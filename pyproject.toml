@@ -1,0 +1,19 @@
+[tool.black]
+line-length = 110
+target-version = ["py38", "py39", "py310"]
+skip-string-normalization = true
+
+[tool.mypy]
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+add_imports = "from __future__ import annotations"
+

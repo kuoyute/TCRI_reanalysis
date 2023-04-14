@@ -1,18 +1,12 @@
+from collections import defaultdict
+
 import numpy as np
 import tensorflow as tf
-from collections import defaultdict
+
 from modules.training_helper import calculate_metric_dict
 
 
-def train(
-    model,
-    datasets,
-    summary_writer,
-    saving_path,
-    max_epoch,
-    evaluate_freq,
-    learning_rate
-):
+def train(model, datasets, summary_writer, saving_path, max_epoch, evaluate_freq, learning_rate):
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     loss_function = tf.keras.losses.MeanSquaredError()
     avg_losses = defaultdict(lambda: tf.keras.metrics.Mean(dtype=tf.float32))
@@ -21,11 +15,11 @@ def train(
     def train_step(model, image_sequences, labels, feature, dV):
         with tf.GradientTape() as tape:
             model_output = model(image_sequences, feature, training=True)
-        
-            sample_weight = tf.math.tanh((dV-20)/10)*1000 +1000.1            
-            sample_weight = tf.expand_dims(sample_weight, axis = 1)  
-       
-            batch_loss = loss_function(labels, model_output, sample_weight=sample_weight)           
+
+            sample_weight = tf.math.tanh((dV - 20) / 10) * 1000 + 1000.1
+            sample_weight = tf.expand_dims(sample_weight, axis=1)
+
+            batch_loss = loss_function(labels, model_output, sample_weight=sample_weight)
 
         gradients = tape.gradient(batch_loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -35,7 +29,7 @@ def train(
 
     best_MAE = np.inf
     best_MSE = np.inf
-    for epoch_index in range(1, max_epoch+1):
+    for epoch_index in range(1, max_epoch + 1):
         print(f'Executing epoch #{epoch_index}')
 
         for image_sequences, labels, feature, frame_ID_ascii, dV in datasets['train']:
@@ -59,8 +53,8 @@ def train(
             valid_MSE = metric_dict['MSE']
             if best_MAE > valid_MAE:
                 best_MAE = valid_MAE
-                model.save_weights(saving_path/'best-MAE', save_format='tf')
+                model.save_weights(saving_path / 'best-MAE', save_format='tf')
             if best_MSE > valid_MSE:
                 best_MSE = valid_MSE
-                model.save_weights(saving_path/'best-MSE', save_format='tf')
+                model.save_weights(saving_path / 'best-MSE', save_format='tf')
                 print('update network')

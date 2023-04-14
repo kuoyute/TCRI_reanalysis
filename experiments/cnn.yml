@@ -14,5 +14,4 @@ training_setting:
   evaluate_freq: 1
   learning_rate: 0.0005
   max_epoch: 25
-
- 
+  

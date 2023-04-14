@@ -1,11 +1,17 @@
-import datetime
-import time
-import os
 import argparse
-from modules.experiment_helper import seed_everything, set_up_tensorflow, \
-    parse_experiment_settings, get_model_save_path, get_summary_writer
-from modules.model_constructor import create_model_instance
+import datetime
+import os
+import time
+
 from modules.data_handler import get_tensorflow_datasets
+from modules.experiment_helper import (
+    get_model_save_path,
+    get_summary_writer,
+    parse_experiment_settings,
+    seed_everything,
+    set_up_tensorflow,
+)
+from modules.model_constructor import create_model_instance
 from modules.model_trainer import train
 
 
@@ -24,13 +30,7 @@ def main(experiment_path, GPU_limit):
     datasets = get_tensorflow_datasets(**experiment_settings['data'])
     model = create_model_instance(experiment_settings['model'])
 
-    train(
-        model,
-        datasets,
-        summary_writer,
-        model_save_path,
-        **experiment_settings['training_setting']
-    )
+    train(model, datasets, summary_writer, model_save_path, **experiment_settings['training_setting'])
 
 
 if __name__ == '__main__':

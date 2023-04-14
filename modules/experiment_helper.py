@@ -1,9 +1,10 @@
-import random
 import os
-import tensorflow as tf
-import numpy as np
-import yaml
+import random
 from pathlib import Path
+
+import numpy as np
+import tensorflow as tf
+import yaml
 
 
 def seed_everything(seed):
@@ -14,7 +15,7 @@ def seed_everything(seed):
 
 
 def parse_experiment_settings(experiment_path):
-    with open(experiment_path, 'r') as file:
+    with open(experiment_path) as file:
         experiment_settings = yaml.full_load(file)
 
     return experiment_settings
@@ -29,8 +30,7 @@ def set_up_tensorflow(GPU_limit):
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
         tf.config.experimental.set_virtual_device_configuration(
-            gpu,
-            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=GPU_limit)]
+            gpu, [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=GPU_limit)]
         )
 
     tf.config.optimizer.set_experimental_options({'layout_optimizer': False})

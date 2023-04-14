@@ -1,5 +1,6 @@
 import importlib
-from modules.experiment_helper import parse_experiment_settings, get_model_save_path
+
+from modules.experiment_helper import get_model_save_path, parse_experiment_settings
 
 
 def create_model_instance(model_name, load_from=''):

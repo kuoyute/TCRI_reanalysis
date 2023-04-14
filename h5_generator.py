@@ -33,10 +33,10 @@ for region in regions:
             frame_info = pd.json_normalize(frame_data.attrs).drop(columns=['PF_PF'])
 
             data_info = pd.concat([data_info, frame_info], axis=0)
-            # transfer 201*201 data matrix into 64*64 numpy ndarray, select only IR and WV
+            # transfer 201*201 data matrix into 100*100 numpy ndarray, select only IR
             data_201x201 = frame_data.to_array().values.transpose([1, 2, 0])
-            data_64x64_IR_WV = data_201x201[68:132, 68:132, :2]
-            data_matrix.append(data_64x64_IR_WV)
+            data_100x100IR = data_201x201[50:150,50:150,:1]
+            data_matrix.append(data_100x100IR)
 
 data_info = data_info.reset_index(drop=True).sort_values(['basin', 'TC_ID', 'datetime'])
 sorted_idx = np.array(data_info.index)

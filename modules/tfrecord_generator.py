@@ -40,6 +40,8 @@ def data_cleaning_and_organizing(image_matrix, info_df):
     info_df['delta_V_6h'] = info_df['delta_V_6h'].fillna(0)
     info_df['TC_spd'] = info_df['TC_spd'].fillna(method='bfill')
     info_df['TC_dir'] = info_df['TC_dir'].fillna(method='bfill')
+    info_df['TC_spd'] = info_df['TC_spd'].fillna(method='ffill')
+    info_df['TC_dir'] = info_df['TC_dir'].fillna(method='ffill')
     info_df['SST'] = info_df['SST'].fillna(method='ffill')
     info_df['POT'] = info_df['POT'].fillna(method='ffill')
 

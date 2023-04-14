@@ -1,5 +1,5 @@
-TCSA_data/*
-!TCSA_data/.gitkeep
+TCRI_data/*
+!TCRI_data/.gitkeep
 logs/*
 !logs/.gitkeep
 saved_models/*

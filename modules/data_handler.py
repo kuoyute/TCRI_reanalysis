@@ -27,8 +27,8 @@ def deserialize(serialized_TC_history):
     example = tf.io.parse_single_example(serialized_TC_history, features)
     history_len = tf.cast(example['history_len'], tf.int32)
 
-    images = tf.reshape(tf.io.decode_raw(example['images'], tf.float64), [history_len, 100, 100, 1])
-    images = tf.cast(images, tf.float32)
+    images = tf.reshape(tf.io.decode_raw(example['images'], tf.float32), [history_len, 100, 100, 1])
+#     images = tf.cast(images, tf.float32)
 
     intensity = tf.reshape(tf.io.decode_raw(example['intensity'], tf.float64), [history_len])
     intensity = tf.cast(intensity, tf.float32)

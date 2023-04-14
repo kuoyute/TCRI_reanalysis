@@ -3,7 +3,7 @@ experiment_name: 'ctl'
 model: ConvLSTM
 
 data:
-  data_folder: 'TCSA_data'
+  data_folder: 'TCRI_data'
   batch_size: 50
   encode_length: 2
   estimate_distance: 8

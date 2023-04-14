@@ -34,8 +34,10 @@ def data_cleaning_and_organizing(image_matrix, info_df):
     # convert the specified columns to float32
     info_df[float_columns] = info_df[float_columns].astype('float32')
 
+    info_df.loc[((info_df['SST'].isna()) & (info_df['Dis2Land'] > 500)), 'Dis2Land'] = pd.NA
     info_df['Dis2Land'] = info_df['Dis2Land'].fillna(method='bfill')
     info_df['delta_V_3h'] = info_df['delta_V_3h'].fillna(0)
+    info_df['delta_V_6h'] = info_df['delta_V_6h'].fillna(0)
     info_df['TC_spd'] = info_df['TC_spd'].fillna(method='bfill')
     info_df['TC_dir'] = info_df['TC_dir'].fillna(method='bfill')
     info_df['SST'] = info_df['SST'].fillna(method='ffill')
@@ -100,6 +102,7 @@ def write_tfrecord(image_matrix, info_df, tfrecord_path):
         lat = single_TC_info.TC_lat.to_numpy(dtype='float')
         Vmax = single_TC_info.Vmax.to_numpy(dtype='float')
         delta_V_3h = single_TC_info.delta_V_3h.to_numpy(dtype='float')
+        delta_V_6h = single_TC_info.delta_V_6h.to_numpy(dtype='float')
         TC_spd = single_TC_info.TC_spd.to_numpy(dtype='float')
         SST = single_TC_info.SST.to_numpy(dtype='float')
         POT = single_TC_info.POT.to_numpy(dtype='float')
@@ -128,7 +131,6 @@ def write_tfrecord(image_matrix, info_df, tfrecord_path):
                 local_time_sin,
                 local_time_cos,
                 lat,
-                delta_V_3h,
                 POT,
                 TC_spd,
                 SST,
@@ -142,6 +144,8 @@ def write_tfrecord(image_matrix, info_df, tfrecord_path):
                 shr_x,
                 shr_y,
                 LMFmag,
+                delta_V_6h,
+                delta_V_3h,
             ]
         )
 
@@ -165,7 +169,7 @@ def write_tfrecord(image_matrix, info_df, tfrecord_path):
 
 
 def generate_tfrecord(data_folder):
-    file_path = Path(data_folder, 'TCSA_reanalysis.h5')
+    file_path = Path(data_folder, 'TCRI_reanalysis.h5')
     if not file_path.exists():
         raise ValueError(
             "h5 file and tfrecord not found. Please check h5 file name or link to {data_folder}."
@@ -182,14 +186,14 @@ def generate_tfrecord(data_folder):
 
     for phase, (image_matrix, info_df) in phase_data.items():
         image_matrix, info_df = group_by_id(image_matrix, info_df)
-        phase_path = Path(data_folder, f'TCSA.tfrecord.{phase}')
+        phase_path = Path(data_folder, f'TCRI.tfrecord.{phase}')
         write_tfrecord(image_matrix, info_df, phase_path)
 
 
 def get_or_generate_tfrecord(data_folder):
     tfrecord_path = {}
     for phase in ['train', 'valid', 'test']:
-        phase_path = Path(data_folder, f'TCSA.tfrecord.{phase}')
+        phase_path = Path(data_folder, f'TCRI.tfrecord.{phase}')
         if not phase_path.exists():
             print(f'tfrecord {phase_path} not found! try to generate it!')
             generate_tfrecord(data_folder)

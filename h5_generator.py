@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_folder', help='path to the folder \'TC_data\'')
-parser.add_argument('--output', help='path to the output hdf5 file', default='./TCSA_data/TCSA_reanalysis.h5')
+parser.add_argument('--output', help='path to the output hdf5 file', default='./TCRI_data/TCRI_reanalysis.h5')
 args = parser.parse_args()
 
 f = h5py.File(args.output, 'w')

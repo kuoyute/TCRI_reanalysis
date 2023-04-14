@@ -30,7 +30,7 @@ pipenv run python main.py <experiment_path>
 experiments/ctl.yml
 ```
 
-***Notice that on the very first execution, it will download and extract the dataset before saving it into a folder "TCSA_data/".
+***Notice that on the very first execution, it will download and extract the dataset before saving it into a folder "TCRI_data/".
 This demands approximately 20GB space on disk***
 
 ### Some usful aguments

@@ -1,7 +1,12 @@
 TCSA_data/*
+!TCSA_data/.gitkeep
 logs/*
+!logs/.gitkeep
 saved_models/*
+!saved_models/.gitkeep
 saved_csv/*
+!saved_csv/.gitkeep
+
 .vscode/
 
 # Byte-compiled / optimized / DLL files

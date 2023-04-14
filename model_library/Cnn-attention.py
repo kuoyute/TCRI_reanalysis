@@ -14,10 +14,12 @@ class Model(tf.keras.Model):
             layers.MaxPooling2D((2, 2)),
             layers.Conv2D(filters=32, kernel_size=(3, 3), activation='LeakyReLU'),
             layers.Conv2D(filters=32, kernel_size=(3, 3), activation='LeakyReLU'),
-            layers.Conv2D(filters=32, kernel_size=(3, 3), activation='LeakyReLU'),
-            layers.Conv2D(filters=32, kernel_size=(3, 3), activation='LeakyReLU'),
         ]
-
+        
+        self.spatial_attention = layers.Conv2D(filters=1, kernel_size=1, activation='sigmoid')
+        
+        self.global_pooling = layers.GlobalMaxPooling2D()
+        
         self.output_layers = [
             layers.Dense(units=512, activation='LeakyReLU'),
             layers.Dropout(rate=0.4),
@@ -36,13 +38,20 @@ class Model(tf.keras.Model):
         batch_size, encode_length, height, width, channels = image_sequences.shape
 
         # image_encoder block
-        images = tf.reshape(image_sequences, [batch_size * encode_length, height, width, channels])
+        images = tf.reshape(image_sequences, [batch_size, height, width, channels * encode_length])
 
         normalized_images = self.input_norm(images, training=training)
         encoded_images = self.apply_list_of_layers(normalized_images, self.encoding_layer, training)
 
-        flatten_feature = tf.reshape(encoded_images, [batch_size, -1])
-
+        # Spatial Attention
+        attention = self.spatial_attention(encoded_images)
+        attention_out = encoded_images * attention
+        
+        # Global Pooling
+        flatten_feature = self.global_pooling(attention_out)
+#         images_num, channels = flatten_feature.shape
+#         flatten_feature = tf.reshape(flatten_feature, [images_num // encode_length, channels * encode_length])
+        
         feature = self.input_norm_aux(feature, training=training)
 
         combine_feature = tf.concat([flatten_feature, feature], 1)

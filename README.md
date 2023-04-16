@@ -1,6 +1,6 @@
 # TCRI
 
-Please refer to the paper for more ensemble details:
+Please refer to the paper for more details:
 ### A Deep Learning Ensemble Approach for Predicting Tropical Cyclone Rapid Intensification
  
 
@@ -30,21 +30,21 @@ pipenv run python main.py <experiment_path>
 experiments/ctl.yml
 ```
 
-***Notice that on the very first execution, it will download and extract the dataset before saving it into a folder "TCRI_data/".
-This demands approximately 20GB space on disk***
+***Please prepare TCRI_reanalysis.h5 at "TCRI_data/".
+This h5 file could be gemerate through "h5_generator.py".***
 
-### Some usful aguments
+### Some usful arguments
 
 #### To limit GPU usage
 Add *GPU_limit* argument, for example:
 ```args
-pipenv run python train main.py <experiment_path> --GPU_limit 3000
+pipenv run python main.py <experiment_path> --GPU_limit 3000
 ```
 
 #### To set CUDA_VISIBLE_DEVICE
 Add *-d* argument, for example:
 ```args
-pipenv run python train main.py <experiment_path> -d 0
+pipenv run python main.py <experiment_path> -d 0
 ```
 
 ## Evaluation

@@ -22,7 +22,7 @@ class Model(tf.keras.Model):
         
         self.output_layers = [
             layers.Dense(units=512, activation='LeakyReLU'),
-            layers.Dropout(rate=0.4),
+            layers.Dropout(rate=0.05),
             layers.Dense(units=64, activation='LeakyReLU'),
             layers.Dense(units=1, activation='LeakyReLU'),
         ]
@@ -49,8 +49,6 @@ class Model(tf.keras.Model):
         
         # Global Pooling
         flatten_feature = self.global_pooling(attention_out)
-#         images_num, channels = flatten_feature.shape
-#         flatten_feature = tf.reshape(flatten_feature, [images_num // encode_length, channels * encode_length])
         
         feature = self.input_norm_aux(feature, training=training)
 

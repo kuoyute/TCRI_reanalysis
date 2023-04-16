@@ -1,6 +1,6 @@
-experiment_name: 'caa'
+experiment_name: 'cnn-cross-channel'
 
-model: Cnn-attention
+model: Cnn-cross-channel-attention
 
 data:
   data_folder: 'TCRI_data'

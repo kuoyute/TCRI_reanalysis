@@ -20,7 +20,7 @@ class Model(tf.keras.Model):
 
         self.output_layers = [
             layers.Dense(units=512, activation='LeakyReLU'),
-            layers.Dropout(rate=0.4),
+            layers.Dropout(rate=0.1),
             layers.Dense(units=64, activation='LeakyReLU'),
             layers.Dense(units=1, activation='LeakyReLU'),
         ]
@@ -36,12 +36,13 @@ class Model(tf.keras.Model):
         batch_size, encode_length, height, width, channels = image_sequences.shape
 
         # image_encoder block
-        images = tf.reshape(image_sequences, [batch_size * encode_length, height, width, channels])
+        images = tf.reshape(image_sequences, [batch_size, height, width, channels * encode_length])
 
         normalized_images = self.input_norm(images, training=training)
         encoded_images = self.apply_list_of_layers(normalized_images, self.encoding_layer, training)
 
-        flatten_feature = tf.reshape(encoded_images, [batch_size, -1])
+#         flatten_feature = tf.reshape(encoded_images, [batch_size, -1])
+        flatten_feature = layers.GlobalMaxPooling2D()(encoded_images)
 
         feature = self.input_norm_aux(feature, training=training)
 

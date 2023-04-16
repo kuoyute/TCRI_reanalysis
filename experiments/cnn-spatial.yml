@@ -1,6 +1,6 @@
-experiment_name: 'cnn'
+experiment_name: 'cnn-spatial'
 
-model: Cnn
+model: Cnn-spatial-attention
 
 data:
   data_folder: 'TCRI_data'

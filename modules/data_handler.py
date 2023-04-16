@@ -117,11 +117,10 @@ def get_tensorflow_datasets(
             num_parallel_calls=tf.data.AUTOTUNE,
         )
 
-        TC_sequence = preprocessed_histories.interleave(
+        TC_sequence = preprocessed_histories.flat_map(
             partial(
                 breakdown_into_sequence, encode_length=encode_length, estimate_distance=estimate_distance
-            ),
-            num_parallel_calls=tf.data.AUTOTUNE,
+            )
         )
 
         dataset = TC_sequence.shuffle(buffer_size=1000)

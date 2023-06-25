@@ -1,11 +1,11 @@
-experiment_name: 'cnn-cross-channel'
+experiment_name: 'cnn-two-stage'
 
-model: Cnn-cross-channel-attention
+model: Cnn-two-stage
 
 data:
   data_folder: 'TCRI_data'
   batch_size: 50
-  encode_length: 2
+  encode_length: 3
   estimate_distance: 8
   rotate_type: 'no'
   input_image_type: [0]
@@ -14,4 +14,4 @@ training_setting:
   evaluate_freq: 1
   learning_rate: 0.0005
   max_epoch: 25
-  
+  class_weight: 3

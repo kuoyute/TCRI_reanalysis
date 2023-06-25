@@ -20,8 +20,8 @@ def deserialize(serialized_TC_history):
         'intensity': tf.io.FixedLenFeature([], tf.string),
         'frame_ID': tf.io.FixedLenFeature([], tf.string),
         'env_feature': tf.io.FixedLenFeature([], tf.string),
+        'status_feature': tf.io.FixedLenFeature([], tf.string),
         'VWSdir': tf.io.FixedLenFeature([], tf.string),
-        'TC_spd': tf.io.FixedLenFeature([], tf.string),
     }
 
     example = tf.io.parse_single_example(serialized_TC_history, features)
@@ -33,52 +33,75 @@ def deserialize(serialized_TC_history):
     intensity = tf.reshape(tf.io.decode_raw(example['intensity'], tf.float64), [history_len])
     intensity = tf.cast(intensity, tf.float32)
 
+    VWSdir = tf.reshape(tf.io.decode_raw(example['VWSdir'], tf.float64), [history_len])
+    VWSdir = tf.cast(VWSdir, tf.float32)
+    
     env_feature = tf.reshape(tf.io.decode_raw(example['env_feature'], tf.float64), [-1, history_len])
     env_feature = tf.cast(env_feature, tf.float32)
 
-    VWSdir = tf.reshape(tf.io.decode_raw(example['VWSdir'], tf.float64), [history_len])
-    VWSdir = tf.cast(VWSdir, tf.float32)
-
-    TC_spd = tf.reshape(tf.io.decode_raw(example['TC_spd'], tf.float64), [history_len])
-    TC_spd = tf.cast(TC_spd, tf.float32)
+    status_feature = tf.reshape(tf.io.decode_raw(example['status_feature'], tf.float64), [-1, history_len])
+    status_feature = tf.cast(status_feature, tf.float32)
 
     frame_ID_ascii = tf.reshape(tf.io.decode_raw(example['frame_ID'], tf.uint8), [history_len, -1])
 
-    return images, intensity, env_feature, history_len, frame_ID_ascii, VWSdir, TC_spd
+    return images, intensity, env_feature, history_len, frame_ID_ascii, VWSdir, status_feature
 
 
 def breakdown_into_sequence(
-    images, intensity, env_feature, history_len, frame_ID_ascii, TC_spd, encode_length, estimate_distance
+    images, intensity, env_feature, history_len, frame_ID_ascii, status_feature, encode_length, estimate_distance
 ):
-    sequence_num = history_len - (encode_length + estimate_distance) + 1
-    starting_index = tf.range(sequence_num)
+    sequence_num = history_len - (encode_length + estimate_distance) -1
+    starting_index = tf.range(1, sequence_num+1)
 
     image_sequences = tf.map_fn(
         lambda start: images[start : start + encode_length], starting_index, fn_output_signature=tf.float32
     )
-
+    
 #     intensity -= TC_spd * 0.54  # km/hr to kt
 
-    starting_frame_ID_ascii = frame_ID_ascii[encode_length - 1 : -estimate_distance]
-    starting_intensity = intensity[encode_length - 1 : -estimate_distance]
-    ending_intensity = intensity[encode_length + estimate_distance - 1 :]
+    starting_frame_ID_ascii = frame_ID_ascii[encode_length: -estimate_distance-1]    
+    starting_intensity = intensity[encode_length : -estimate_distance-1]
+
+    ending_intensity = intensity[encode_length + estimate_distance :-1]
 
     labels = ending_intensity
+    labels_prior = intensity[encode_length + estimate_distance -1 :-2]
+    labels_latter = intensity[encode_length + estimate_distance +1  :]
+    
     intensity_change = ending_intensity - starting_intensity
 
-    starting_env_feature = env_feature[:, encode_length - 1 : -estimate_distance]
-    ending_env_feature = env_feature[:, encode_length + estimate_distance - 1 :]
-
-    feature = tf.concat([[starting_intensity], starting_env_feature, ending_env_feature], 0)
+    starting_env_feature = env_feature[:, encode_length: -estimate_distance-1]
+    ending_env_feature = env_feature[:, encode_length + estimate_distance :-1]
+    
+    starting_status_feature = status_feature[:-1, encode_length : -estimate_distance-1]
+    dv_3h = status_feature[-1, encode_length : -estimate_distance-1]
+    
+    feature = tf.concat([[starting_intensity], starting_env_feature, ending_env_feature, starting_status_feature], 0)
     feature = tf.transpose(feature)
-
+    
+    prior_starting_env_feature = env_feature[:, encode_length-1: -estimate_distance-1-1]
+    prior_ending_env_feature = env_feature[:, encode_length + estimate_distance-1 :-1-1]    
+    prior_starting_intensity = intensity[encode_length-1 : -estimate_distance-1-1]
+    
+    prior_feature = tf.concat([[prior_starting_intensity], prior_starting_env_feature, prior_ending_env_feature, starting_status_feature], 0)
+    prior_feature = tf.transpose(prior_feature)
+    
+    
+    latter_starting_env_feature = env_feature[:, encode_length+1: -estimate_distance-1+1]
+    latter_ending_env_feature = env_feature[:, encode_length + estimate_distance+1 :]
+    latter_starting_intensity = intensity[encode_length+1 : -estimate_distance-1+1]
+    
+    latter_feature = tf.concat([[latter_starting_intensity], latter_starting_env_feature, latter_ending_env_feature, starting_status_feature], 0)
+    latter_feature = tf.transpose(latter_feature)
+    
+    
     return tf.data.Dataset.from_tensor_slices(
-        (image_sequences, labels, feature, starting_frame_ID_ascii, intensity_change)
+        (image_sequences, labels, labels_prior, labels_latter, feature, prior_feature, latter_feature, starting_frame_ID_ascii, dv_3h, intensity_change)
     )
 
 
 def image_preprocessing(
-    images, intensity, env_feature, history_len, frame_ID_ascii, VWSdir, TC_spd, rotate_type, input_image_type
+    images, intensity, env_feature, history_len, frame_ID_ascii, VWSdir, status_feature, rotate_type, input_image_type
 ):
     images_channels = tf.gather(images, input_image_type, axis=-1)
     if rotate_type == 'single':
@@ -95,7 +118,7 @@ def image_preprocessing(
         
     images_64x64 = tf.image.central_crop(rotated_images, 0.64)
     
-    return images_64x64, intensity, env_feature, history_len, frame_ID_ascii, TC_spd
+    return images_64x64, intensity, env_feature, history_len, frame_ID_ascii, status_feature
 
 
 def get_tensorflow_datasets(
@@ -104,7 +127,7 @@ def get_tensorflow_datasets(
     tfrecord_paths = get_or_generate_tfrecord(data_folder)
     datasets = dict()
 
-    min_history_len = encode_length + estimate_distance
+    min_history_len = encode_length + estimate_distance+2
 
     for phase, record_path in tfrecord_paths.items():
         serialized_TC_histories = tf.data.TFRecordDataset([record_path], num_parallel_reads=8)

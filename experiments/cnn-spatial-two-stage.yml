@@ -1,6 +1,6 @@
-experiment_name: 'cnn'
+experiment_name: 'cnn-spatial-two-stage'
 
-model: Cnn
+model: Cnn-spatial-attention-two-stage
 
 data:
   data_folder: 'TCRI_data'
@@ -14,4 +14,4 @@ training_setting:
   evaluate_freq: 1
   learning_rate: 0.0005
   max_epoch: 25
-  
+  class_weight: 3  
